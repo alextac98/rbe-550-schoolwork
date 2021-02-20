@@ -1,3 +1,4 @@
+from map2d import map2d
 # Basic searching algorithms
 
 def bfs(grid, start, goal):
@@ -27,6 +28,30 @@ def bfs(grid, start, goal):
     path = []
     steps = 0
     found = False
+
+    map = map2d(grid)
+
+    frontier = []
+    frontier.append(start)
+    visited = {}
+    visited[tuple(start)] = None
+
+    while not len(frontier) == 0:
+        current = frontier[0]
+        for neighbor in map.get_neighbors(current):
+            if neighbor is not None and \
+               tuple(neighbor) not in visited.keys() and \
+               map.get_value(neighbor) != 0:
+                frontier.append(neighbor)
+                visited[tuple(neighbor)] = tuple(current)
+        frontier.pop(0)
+    found = True
+    curr_point = tuple(goal)
+    while current != start:
+        path.append(current)
+        current = list(visited.get(current))
+    path.append(start)
+    path.reverse()
 
     if found:
         print(f"It takes {steps} steps to find a path using BFS")
