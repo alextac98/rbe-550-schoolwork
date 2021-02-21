@@ -112,6 +112,7 @@ def dfs(grid, start, goal):
     while curr_point != start:
         path.append(curr_point)
         curr_point = list(visited.get(tuple(curr_point)))
+        steps += 1
     path.append(start)
     path.reverse()
 
