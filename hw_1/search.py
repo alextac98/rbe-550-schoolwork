@@ -97,11 +97,12 @@ def dfs(grid, start, goal):
     frontier = []
     frontier.append(start)
     visited = {}
-    visited[tuple(start)] = None
+    current = None
 
     while len(frontier) != 0 :
         if tuple(goal) in visited.keys():
             break
+        visited[tuple(frontier[0])] = tuple(current) if current is not None else None
         current = frontier[0]
         frontier.pop(0)
         valid_neighbors = []
@@ -110,7 +111,6 @@ def dfs(grid, start, goal):
                tuple(neighbor) not in visited.keys() and \
                map.get_value(neighbor) == 0:
                 valid_neighbors.append(neighbor)
-                visited[tuple(neighbor)] = tuple(current)
         frontier = valid_neighbors + frontier
     
     found = True
