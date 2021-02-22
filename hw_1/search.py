@@ -38,6 +38,8 @@ def bfs(grid, start, goal):
 
     while not len(frontier) == 0:
         current = frontier[0]
+        if tuple(goal) in visited.keys():
+            break
         for neighbor in map.get_neighbors(current):
             if neighbor is not None and \
                tuple(neighbor) not in visited.keys() and \
@@ -45,12 +47,13 @@ def bfs(grid, start, goal):
                 frontier.append(neighbor)
                 visited[tuple(neighbor)] = tuple(current)
         frontier.pop(0)
+
     found = True
+    steps = len(visited)
     curr_point = goal
     while curr_point != start:
         path.append(curr_point)
         curr_point = list(visited.get(tuple(curr_point)))
-        steps += 1
     path.append(start)
     path.reverse()
 
@@ -96,7 +99,9 @@ def dfs(grid, start, goal):
     visited = {}
     visited[tuple(start)] = None
 
-    while not len(frontier) == 0:
+    while len(frontier) != 0 :
+        if tuple(goal) in visited.keys():
+            break
         current = frontier[0]
         frontier.pop(0)
         valid_neighbors = []
@@ -107,17 +112,18 @@ def dfs(grid, start, goal):
                 valid_neighbors.append(neighbor)
                 visited[tuple(neighbor)] = tuple(current)
         frontier = valid_neighbors + frontier
+    
     found = True
+    steps = len(visited)
     curr_point = goal
     while curr_point != start:
         path.append(curr_point)
         curr_point = list(visited.get(tuple(curr_point)))
-        steps += 1
     path.append(start)
     path.reverse()
 
     if found:
-        print(f"It takes {steps} steps to find a path using BFS")
+        print(f"It takes {steps} steps to find a path using DFS")
     else:
         print("No path found")
     return path, steps
