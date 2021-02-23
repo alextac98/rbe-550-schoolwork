@@ -159,38 +159,40 @@ def dijkstra(grid, start, goal):
     steps = 0
     found = False
 
-    visited = PriorityQueue()
-    visited.put(start, 0)
+    map = map2d(grid)
+
+    frontier = PriorityQueue()
+    frontier.put(start, 0)
 
     came_from = {}
-    cost_so_far = {}
 
-
-    while 1:
-        (cost, current) = visited.get()
+    while not frontier.is_empty():
+        (curr_cost, current) = frontier.get()
+        frontier.remove()
         if current == goal:
+            found = True
             break
 
         for neighbor in map.get_neighbors(current):
-            new_cost = cost + map.get_manhattan_distance(current, neighbor)
-            
-
-
-    # came_from[tuple(start)] = None
-    # cost_so_far[tuple(start)] = 0
-
-    # map = map2d(grid)
-
-    # while not frontier.empty():
-    #     (weight, current) = frontier.get()
-    #     if current == goal:
-    #         break
-    #     for neighbor in map.get_neighbors(current):
-    #         new_cost = cost_so_far[tuple(current)] + map.get_manhattan_distance(current, neighbor)
-    #         if tuple(neighbor) not in cost_so_far or new_cost < cost_so_far[neighbor]:
-    #             cost_so_far[tuple(neighbor)] = new_cost
-    #             frontier.put(neighbor, new_cost)
-    #             came_from[tuple(neighbor)] = current
+            if neighbor is None or map.get_value(neighbor) == 1:
+                continue
+            neighbor_cost = curr_cost + map.get_manhattan_distance(current, neighbor)
+            if tuple(neighbor) not in came_from or \
+               neighbor_cost < came_from.get(tuple(neighbor)).get('cost'):
+                frontier.put(neighbor, neighbor_cost)
+                came_from[tuple(neighbor)] = {
+                    'from': current,
+                    'cost': neighbor_cost
+                }
+        steps +=1
+        
+    found = True
+    curr_point = goal
+    while curr_point != start:
+        path.append(curr_point)
+        curr_point = came_from.get(tuple(curr_point)).get('from')
+    path.append(start)
+    path.reverse()
 
     if found:
         print(f"It takes {steps} steps to find a path using Dijkstra")
