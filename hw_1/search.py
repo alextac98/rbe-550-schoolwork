@@ -165,6 +165,10 @@ def dijkstra(grid, start, goal):
     frontier.put(start, 0)
 
     came_from = {}
+    came_from[tuple(start)] = {
+        'from': None,
+        'cost': 0
+    }
 
     while not frontier.is_empty():
         (curr_cost, current) = frontier.get()
@@ -185,7 +189,7 @@ def dijkstra(grid, start, goal):
                     'cost': neighbor_cost
                 }
         steps +=1
-        
+
     found = True
     curr_point = goal
     while curr_point != start:
@@ -224,10 +228,54 @@ def astar(grid, start, goal):
     >>> astar_path
     [[0, 0], [1, 0], [2, 0], [3, 0], [3, 1]]
     '''
-    ### YOUR CODE HERE ###
+    
+    debug_draw = False
+
     path = []
     steps = 0
     found = False
+
+    map = map2d(grid)
+
+    frontier = PriorityQueue()
+    frontier.put(start, map.get_manhattan_distance(start, goal))
+
+    came_from = {}
+    came_from[tuple(start)] = {
+        'from': None,
+        'cost': 0
+    }
+
+    while not frontier.is_empty():
+        (curr_cost, current) = frontier.get()
+        frontier.remove()
+        if current == goal:
+            found = True
+            break
+
+        for neighbor in map.get_neighbors(current):
+            if neighbor is None or map.get_value(neighbor) == 1:
+                continue
+            neighbor_cost = curr_cost - map.get_manhattan_distance(current, goal) + \
+                map.get_manhattan_distance(current, neighbor) + \
+                map.get_manhattan_distance(neighbor, goal)
+            if tuple(neighbor) not in came_from or \
+               neighbor_cost < came_from.get(tuple(neighbor)).get('cost'):
+                frontier.put(neighbor, neighbor_cost)
+                came_from[tuple(neighbor)] = {
+                    'from': current,
+                    'cost': neighbor_cost
+                }
+        if debug_draw: map.draw_path(start = start, goal = goal, path = path, came_from = came_from)
+        
+    # found = True
+    steps = len(came_from) - 2 # Subtract 2 to remove start and end goal
+    curr_point = goal
+    while curr_point != start:
+        path.append(curr_point)
+        curr_point = came_from.get(tuple(curr_point)).get('from')
+    path.append(start)
+    path.reverse()
 
     if found:
         print(f"It takes {steps} steps to find a path using A*")

@@ -55,7 +55,7 @@ def draw_path(grid, path, title):
 
 if __name__ == "__main__":
     # Load the map
-    grid, start, goal = load_map('test_map.csv')
+    grid, start, goal = load_map('map.csv')
 
     # Search
     bfs_path, bfs_steps = bfs(grid, start, goal)
