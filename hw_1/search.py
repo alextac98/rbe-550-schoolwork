@@ -154,7 +154,7 @@ def dijkstra(grid, start, goal):
     >>> dij_path
     [[0, 0], [1, 0], [2, 0], [3, 0], [3, 1]]
     '''
-    debug_draw = True
+    debug_draw = False
 
     path = []
     steps = 0
@@ -174,7 +174,7 @@ def dijkstra(grid, start, goal):
     while not frontier.is_empty():
         (curr_cost, current) = frontier.get()
         frontier.remove()
-        if current == goal:
+        if tuple(goal) in came_from.keys():
             found = True
             break
 
@@ -192,7 +192,7 @@ def dijkstra(grid, start, goal):
         if debug_draw: map.draw_path(start = start, goal = goal, path = path, came_from = came_from)
         
     # found = True
-    steps = len(came_from) - 2 # Subtract 2 to remove start and end goal
+    steps = len(came_from)
     curr_point = goal
     while curr_point != start:
         path.append(curr_point)
@@ -231,7 +231,7 @@ def astar(grid, start, goal):
     [[0, 0], [1, 0], [2, 0], [3, 0], [3, 1]]
     '''
     
-    debug_draw = False
+    debug_draw = True
 
     path = []
     steps = 0
@@ -251,7 +251,7 @@ def astar(grid, start, goal):
     while not frontier.is_empty():
         (curr_cost, current) = frontier.get()
         frontier.remove()
-        if current == goal:
+        if tuple(goal) in came_from.keys():
             found = True
             break
 
@@ -271,7 +271,7 @@ def astar(grid, start, goal):
         if debug_draw: map.draw_path(start = start, goal = goal, path = path, came_from = came_from)
         
     # found = True
-    steps = len(came_from) - 2 # Subtract 2 to remove start and end goal
+    steps = len(came_from) - 1
     curr_point = goal
     while curr_point != start:
         path.append(curr_point)
