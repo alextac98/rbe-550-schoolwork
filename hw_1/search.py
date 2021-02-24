@@ -154,7 +154,8 @@ def dijkstra(grid, start, goal):
     >>> dij_path
     [[0, 0], [1, 0], [2, 0], [3, 0], [3, 1]]
     '''
-    ### YOUR CODE HERE ###
+    debug_draw = True
+
     path = []
     steps = 0
     found = False
@@ -180,7 +181,7 @@ def dijkstra(grid, start, goal):
         for neighbor in map.get_neighbors(current):
             if neighbor is None or map.get_value(neighbor) == 1:
                 continue
-            neighbor_cost = curr_cost + map.get_manhattan_distance(current, neighbor)
+            neighbor_cost = curr_cost + map.get_manhattan_distance(current, neighbor) 
             if tuple(neighbor) not in came_from or \
                neighbor_cost < came_from.get(tuple(neighbor)).get('cost'):
                 frontier.put(neighbor, neighbor_cost)
@@ -188,9 +189,10 @@ def dijkstra(grid, start, goal):
                     'from': current,
                     'cost': neighbor_cost
                 }
-        steps +=1
-
-    found = True
+        if debug_draw: map.draw_path(start = start, goal = goal, path = path, came_from = came_from)
+        
+    # found = True
+    steps = len(came_from) - 2 # Subtract 2 to remove start and end goal
     curr_point = goal
     while curr_point != start:
         path.append(curr_point)
