@@ -231,7 +231,7 @@ def astar(grid, start, goal):
     [[0, 0], [1, 0], [2, 0], [3, 0], [3, 1]]
     '''
     
-    debug_draw = True
+    debug_draw = False
 
     path = []
     steps = 0
