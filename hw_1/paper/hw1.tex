@@ -97,9 +97,33 @@ path.reverse()
     \end{figure} 
 
     \section{Depth First Search (DFS)} \label{DFS}
+    DFS can be considered the antithesis of BFS; instead of spreading out uniformly, the algorithm picks a path and goes down it until a dead end. This often leads to very quick but non-optimal results. Like BFS, this search algorithm is blind to movement costs.
 
     \subsection{Implementation}
-    
+    DFS is very similar to BFS, but with a few minor modifications. Instead of appending new neighbors to the end of the frontier list, they are appended to the beginning to be considered immediately. Below is some basic Python pseudocode describing my implementation of DFS:
+
+    \begin{lstlisting}[language=Python]
+frontier = list()
+frontier.append(start_node)
+visited = dictionary()
+visited[start_node] = None
+
+while frontier not empty:
+    current = frontier.get_first()
+    if goal found in visited:
+        exit loop and return path
+    for neighbor in neighbors of current:
+        if neighbor exists and \
+            not in visited and \
+            not obstacle:
+            frontier.add_to_beginning(neighbor)
+            visited[neighbor] = current
+    \end{lstlisting}
+        
+    The output of the code above only gives a list of visited nodes and where they were visited from. Therefore, a code block needs to be added to generate a path (see DFS)
+
+    Finally, to get the number of steps taken, I simply took the length of the \lstinline{visited} dictionary.
+
     \subsection{Results}
 
     \begin{figure}[ht]
@@ -113,12 +137,53 @@ path.reverse()
         \label{fig:Dijkstra_Weights_Example}
         \caption{Depth First Search result for a 4x4 map. The algorithm took 9 steps to find the solution}
     \end{figure} 
+    
+    \newpage
 
     \section{Dijkstra's Algorithm} \label{Dijkstra}
     Dijkstra's algorithm extends the usefulness Breath First Search by considering path heuristics. This is extremely useful to get a complete and optimal path from a start node to a goal node considering the movement effort going from one node to another. However, like BFS, it takes a very long time since there is no heuristic to push the algorithm to the goal node faster than other methods.
 
     \subsection{Implementation}
-    
+    Like stated above, Dijkstra's algorithm adds movement weight to a BFS-like algorithm. Therefore, weights need to be added to the visited and frontier data structures and need to be considered when moving from one to another
+
+    \begin{lstlisting}[language=Python]
+frontier = PriorityQueue()
+frontier.put(start_node, 0) # 0 is the weight
+came_from = dictionary()
+came_from[start_node] = {
+    'from': None,
+    'cost': 0
+}
+
+while frontier not empty:
+    (current_cost, current) = frontier.get_best()
+    if goal found in came_from:
+        exit loop and return path
+    for neighbor in neighbors of current:
+        neighbor_cost = current_cost + manhattan_distance(current, neighbor)
+        if neighbor exists and \
+            not in visited and \
+            not obstacle:
+            frontier.add(neighbor, neighbor_cost)
+            came_from[neighbor] = {
+                'from': current,
+                'cost': neighbor_cost
+            }
+    \end{lstlisting}
+        
+    The output of the code above only gives a list of \lstinline{came_from} nodes and where they were visited from. Therefore, a code block needs to be added to generate a path:
+
+    \begin{lstlisting} [language=Python]
+path = list()
+curr_point = goal_node
+while curr_point is not start:
+        path.append(curr_point)
+        curr_point = came_from.get(curr_point).get('from')
+path.append(start)
+path.reverse()
+    \end{lstlisting}
+
+    Finally, to get the number of steps taken, I simply took the length of the \lstinline{came_from} dictionary.
     \subsection{Results}
 
     \begin{figure}[ht]
@@ -134,9 +199,49 @@ path.reverse()
     \end{figure} 
 
     \section{A*} \label{A*}
+    The A* algorithm is the best of all worlds when it comes to the 4 algorithms. It adds to Dijkstra's algorithm by adding an additional heuristic for estimated cost from the current node to the goal node. This drastically increases the speed of computation by skipping the breath first search-like exploration in all directions. However, the quality of this path is heavily dependent on the accuracy of the cost-to-goal heuristic. In some severe circumstances, the path outputted may not be optimal and the search will not be complete. This is usually due to a bad future path heuristic function.
 
     \subsection{Implementation}
-    
+    Like stated before, the major difference between the implementation of A* and Dijkstra's is in the cost function: an added 'estimated' cost to the goal. The cost-to heuristic is added to the future-cost heuristic to get a final weight. 
+
+    \begin{lstlisting}[language=Python]
+frontier = PriorityQueue()
+frontier.put(start_node, 0) # 0 is the weight
+came_from = dictionary()
+came_from[start_node] = {
+    'from': None,
+    'cost': 0
+}
+
+while frontier not empty:
+    (current_cost, current) = frontier.get_best()
+    if goal found in came_from:
+        exit loop and return path
+    for neighbor in neighbors of current:
+        neighbor_cost = current_cost - manhattan_distance(current, goal) + manhattan_distance(current, neighbor) + manhattan_distance(current, neighbor)
+        if neighbor exists and \
+            not in visited and \
+            not obstacle:
+            frontier.add(neighbor, neighbor_cost)
+            came_from[neighbor] = {
+                'from': current,
+                'cost': neighbor_cost
+            }
+    \end{lstlisting}
+        
+    The output of the code above only gives a list of \lstinline{came_from} nodes and where they were visited from. Therefore, a code block needs to be added to generate a path:
+
+    \begin{lstlisting} [language=Python]
+        path = list()
+        curr_point = goal_node
+        while curr_point is not start:
+                path.append(curr_point)
+                curr_point = came_from.get(curr_point).get('from')
+        path.append(start)
+        path.reverse()
+            \end{lstlisting}
+
+    Finally, to get the number of steps taken, I simply took the length of the \lstinline{came_from} dictionary.
     \subsection{Results}
 
     \begin{figure}[ht]
@@ -150,7 +255,7 @@ path.reverse()
         \label{fig:Dijkstra_Weights_Example}
         \caption{A* search result for a 4x4 map. The algorithm took 8 steps to find the solution}
     \end{figure} 
-
+    \newpage
     \printbibliography
 
 \end{document}
