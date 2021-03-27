@@ -3,6 +3,7 @@
 import math
 from priorityqueue import PriorityQueue
 from matplotlib import pyplot as plt
+from matplotlib.patches import Rectangle
 
 class map2d:
     def __init__(self, grid: list):
@@ -37,7 +38,7 @@ class map2d:
     def get_euclidean_distance(self, point1: list, point2: list):
         return math.sqrt(sum([(p1 - p2) ** 2 for p1, p2 in zip(point1, point2)]))
 
-    def draw_path(self, path: list = [], title: str = "Map ", visited: PriorityQueue = PriorityQueue()):
+    def draw_path(self, start, goal, path: list = [], title: str = "Map ", came_from: dict = None):
         # Visualization of the found path using matplotlib
         fig, ax = plt.subplots(1)
         ax.margins()
@@ -54,7 +55,13 @@ class map2d:
         for x, y in path:
             ax.add_patch(Rectangle((y-0.5, x-0.5),1,1,edgecolor='k',facecolor='b'))
 
-        
+        if came_from is not None:
+            for (current_node, value) in came_from.items():
+                from_node = value.get('from')
+                cost = value.get('cost')
+
+                plt.text(current_node[1], current_node[0], str(cost), color='blue', fontsize = 12)
+
 
         ax.add_patch(Rectangle((start[1]-0.5, start[0]-0.5),1,1,edgecolor='k',facecolor='g'))# start
         ax.add_patch(Rectangle((goal[1]-0.5, goal[0]-0.5),1,1,edgecolor='k',facecolor='r'))  # goal
