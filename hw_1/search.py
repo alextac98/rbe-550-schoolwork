@@ -173,7 +173,7 @@ def dijkstra(grid, start, goal):
 
         for neighbor in map.get_neighbors(current):
             new_cost = cost + map.get_manhattan_distance(current, neighbor)
-            
+            if 
 
 
     # came_from[tuple(start)] = None
