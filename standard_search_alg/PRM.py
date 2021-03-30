@@ -1,10 +1,12 @@
 # Standard Algorithm Implementation
 # Sampling-based Algorithms PRM
-
+import math
 import matplotlib.pyplot as plt
+from networkx.drawing.layout import kamada_kawai_layout
 import numpy as np
 import networkx as nx
-
+from numpy.ma import outerproduct
+from scipy import spatial
 
 # Class for PRM
 class PRM:
@@ -18,6 +20,7 @@ class PRM:
         self.graph = nx.Graph()               # constructed graph
         self.path = []                        # list of nodes of the found path
 
+        np.random.seed(0)
 
     def check_collision(self, p1, p2):
         '''Check if the path between two points collide with obstacles
@@ -28,11 +31,42 @@ class PRM:
         return:
             True if there are obstacles between two points
         '''
-        ### YOUR CODE HERE ###
-        return True
+        
+        min_section_lengths = 1
+        pts_list = [p1, p2]
 
+        while (pts_list[1][0]-pts_list[0][0]) ** 2 + (pts_list[1][1] - pts_list[0][1]) ** 2 >= min_section_lengths ** 2:
+            tmp_pts = [pts_list[0]]
+            for i in range(len(pts_list) - 1):
+                # Find midpoint
+                midpoint = ((pts_list[i][0] + pts_list[i+1][0])/2, (pts_list[i][1] + pts_list[i+1][1])/2)
+                # Check collisions
+                test_pts = self.get_pts_in_range(midpoint)
+                for pt in test_pts:
+                    if self.map_array[pt[0], pt[1]] == 0:
+                        return True
+                # Add midpoint to the collision list if no collision
+                tmp_pts.append(midpoint)
+                tmp_pts.append(pts_list[i+1])
+            pts_list = tmp_pts
+        return False
 
-    def dis(self, point1, point2):
+    def get_pts_in_range(self, pt):
+        """ Get all whole points in a range (max distance)
+            Assumes range is 1 for now
+        arguments:
+            pt - point [row, col] (not ints)
+        return:
+            list of points (all ints)
+        """
+        pts_list = set()
+        pts_list.add((math.floor(pt[0]),    math.floor(pt[1])))
+        pts_list.add((math.floor(pt[0]),    math.ceil(pt[1])))
+        pts_list.add((math.ceil(pt[0]),     math.floor(pt[1])))
+        pts_list.add((math.ceil(pt[0]),     math.ceil(pt[1])))
+        return list(pts_list)
+
+    def distance(self, p1, p2):
         '''Calculate the euclidean distance between two points
         arguments:
             p1 - point 1, [row, col]
@@ -41,8 +75,7 @@ class PRM:
         return:
             euclidean distance between two points
         '''
-        ### YOUR CODE HERE ###
-        return 0
+        return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
 
     def uniform_sample(self, n_pts):
@@ -54,11 +87,15 @@ class PRM:
         check collision and append valide points to self.samples
         as [(row1, col1), (row2, col2), (row3, col3) ...]
         '''
-        # Initialize graph
-        self.graph.clear()
 
-        ### YOUR CODE HERE ###
-        self.samples.append((0, 0))
+        for i in range(0, n_pts):
+            # Generate random unifrom sample:
+            ran_row = round(np.random.uniform(size=1, low=0, high=self.map_array.shape[0] - 1)[0])
+            ran_col = round(np.random.uniform(size=1, low=0, high=self.map_array.shape[1] - 1)[0])
+
+            # Add to samples list if doesn't collide
+            if self.map_array[ran_row, ran_col] != 0:
+                self.samples.append([ran_row, ran_col])
 
     
     def random_sample(self, n_pts):
@@ -70,8 +107,6 @@ class PRM:
         check collision and append valide points to self.samples
         as [(row1, col1), (row2, col2), (row3, col3) ...]
         '''
-        # Initialize graph
-        self.graph.clear()
 
         ### YOUR CODE HERE ###
         self.samples.append((0, 0))
@@ -86,8 +121,6 @@ class PRM:
         check collision and append valide points to self.samples
         as [(row1, col1), (row2, col2), (row3, col3) ...]
         '''
-        # Initialize graph
-        self.graph.clear()
 
         ### YOUR CODE HERE ###
         self.samples.append((0, 0))
@@ -102,8 +135,6 @@ class PRM:
         check collision and append valide points to self.samples
         as [(row1, col1), (row2, col2), (row3, col3) ...]
         '''
-        # Initialize graph
-        self.graph.clear()
 
         ### YOUR CODE HERE ###
         self.samples.append((0, 0))
@@ -168,14 +199,19 @@ class PRM:
         elif sampling_method == "bridge":
             self.bridge_sample(n_pts)
 
-        ### YOUR CODE HERE ###
-
         # Find the pairs of points that need to be connected
         # and compute their distance/weight.
         # Store them as
         # pairs = [(p_id0, p_id1, weight_01), (p_id0, p_id2, weight_02), 
         #          (p_id1, p_id2, weight_12) ...]
         pairs = []
+        max_distance = 30
+        kdtree = spatial.KDTree(np.array(self.samples))
+        pairs_raw = list(kdtree.query_pairs(r=max_distance))
+
+        for pair in pairs_raw:
+            if not self.check_collision(tuple(self.samples[pair[0]]), tuple(self.samples[pair[1]])):
+                pairs.append(pair + (1,))
 
         # Use sampled points and pairs of points to build a graph.
         # To add nodes to the graph, use
@@ -188,7 +224,7 @@ class PRM:
         # current point in self.samples
         # For example, for self.samples = [(1, 2), (3, 4), (5, 6)],
         # p_id for (1, 2) is 0 and p_id for (3, 4) is 1.
-        self.graph.add_nodes_from([])
+        self.graph.add_nodes_from(range(len(self.samples)))
         self.graph.add_weighted_edges_from(pairs)
 
         # Print constructed graph information
@@ -214,6 +250,7 @@ class PRM:
         self.samples.append(goal)
         # start and goal id will be 'start' and 'goal' instead of some integer
         self.graph.add_nodes_from(['start', 'goal'])
+        # Add connections to start/goal
 
         ### YOUR CODE HERE ###
 
