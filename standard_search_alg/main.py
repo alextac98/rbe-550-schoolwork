@@ -40,12 +40,12 @@ if __name__ == "__main__":
     RRT_planner = RRT(map_array, start, goal)
 
     # Search with PRM
-    print("PRM with uniform sampling: ")
-    PRM_planner.sample(n_pts=1000, sampling_method="uniform")
-    PRM_planner.search(start, goal)
-    # print("\nPRM with random sampling")
-    # PRM_planner.sample(n_pts=1000, sampling_method="random")
+    # print("PRM with uniform sampling: ")
+    # PRM_planner.sample(n_pts=1000, sampling_method="uniform")
     # PRM_planner.search(start, goal)
+    print("\nPRM with random sampling")
+    PRM_planner.sample(n_pts=1000, sampling_method="random")
+    PRM_planner.search(start, goal)
     # print("\nPRM with Gaussian Sampling")
     # PRM_planner.sample(n_pts=2000, sampling_method="gaussian")
     # PRM_planner.search(start, goal)

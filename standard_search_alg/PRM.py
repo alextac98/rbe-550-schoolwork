@@ -1,6 +1,7 @@
 # Standard Algorithm Implementation
 # Sampling-based Algorithms PRM
 import math
+from typing import NoReturn
 import matplotlib.pyplot as plt
 from networkx.drawing.layout import kamada_kawai_layout
 import numpy as np
@@ -43,13 +44,22 @@ class PRM:
                 # Check collisions
                 test_pts = self.get_pts_in_range(midpoint)
                 for pt in test_pts:
-                    if self.map_array[pt[0], pt[1]] == 0:
+                    if self.is_point_occupied(pt):
                         return True
                 # Add midpoint to the collision list if no collision
                 tmp_pts.append(midpoint)
                 tmp_pts.append(pts_list[i+1])
             pts_list = tmp_pts
         return False
+
+    def is_point_occupied(self, point):
+        """ Checks if the point is occupied in the map
+        arguments:
+            point - point [row, col]
+        return:
+            True if occupied, False if not occupied
+        """
+        return self.map_array[point[0], point[1]] == 0
 
     def get_pts_in_range(self, pt):
         """ Get all whole points in a range (max distance)
@@ -88,14 +98,7 @@ class PRM:
         as [(row1, col1), (row2, col2), (row3, col3) ...]
         '''
 
-        for i in range(0, n_pts):
-            # Generate random unifrom sample:
-            ran_row = round(np.random.uniform(size=1, low=0, high=self.map_array.shape[0] - 1)[0])
-            ran_col = round(np.random.uniform(size=1, low=0, high=self.map_array.shape[1] - 1)[0])
-
-            # Add to samples list if doesn't collide
-            if self.map_array[ran_row, ran_col] != 0:
-                self.samples.append([ran_row, ran_col])
+        
 
     
     def random_sample(self, n_pts):
@@ -107,6 +110,15 @@ class PRM:
         check collision and append valide points to self.samples
         as [(row1, col1), (row2, col2), (row3, col3) ...]
         '''
+
+        for i in range(0, n_pts):
+            # Generate random unifrom sample:
+            ran_row = round(np.random.uniform(size=1, low=0, high=self.map_array.shape[0] - 1)[0])
+            ran_col = round(np.random.uniform(size=1, low=0, high=self.map_array.shape[1] - 1)[0])
+
+            # Add to samples list if doesn't collide
+            if not self.is_point_occupied([ran_row, ran_col]):
+                self.samples.append([ran_row, ran_col])
 
         ### YOUR CODE HERE ###
         self.samples.append((0, 0))
