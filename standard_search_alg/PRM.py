@@ -205,13 +205,20 @@ class PRM:
         # pairs = [(p_id0, p_id1, weight_01), (p_id0, p_id2, weight_02), 
         #          (p_id1, p_id2, weight_12) ...]
         pairs = []
-        max_distance = 30
+        num_neighbors = 10
         kdtree = spatial.KDTree(np.array(self.samples))
-        pairs_raw = list(kdtree.query_pairs(r=max_distance))
+        distances, neighbors = kdtree.query(x=self.samples, k=num_neighbors)
+
+        pairs_raw = []
+
+        for neighbor_list in neighbors:
+            node = neighbor_list[0]
+            for i in range(1, num_neighbors):
+                pairs_raw.append((node, neighbor_list[i], distances[node][i]))
 
         for pair in pairs_raw:
             if not self.check_collision(tuple(self.samples[pair[0]]), tuple(self.samples[pair[1]])):
-                pairs.append(pair + (1,))
+                pairs.append(pair)
 
         # Use sampled points and pairs of points to build a graph.
         # To add nodes to the graph, use
