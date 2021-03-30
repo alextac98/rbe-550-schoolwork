@@ -1,0 +1,81 @@
+\documentclass[journal]{IEEEtran}
+% If IEEEtran.cls has not been installed into the LaTeX system files,
+% manually specify the path to it like:
+% \documentclass[journal]{../sty/IEEEtran}
+
+% Import setup file with includes
+\input{setup.tex}
+
+\title{RBE 550 Standard Search Algorithms Implementation Documentation}
+
+% TODO: Fix authors
+\author{Alex Tacescu | Spring 2021
+% <-this % stops a space
+% \thanks{M. Shell was with the Department
+% of Electrical and Computer Engineering, Georgia Institute of Technology, Atlanta,
+% GA, 30332 USA e-mail: (see http://www.michaelshell.org/contact.html).}% <-this % stops a space
+% \thanks{J. Doe and J. Doe are with Anonymous University.}% <-this % stops a space
+% \thanks{Manuscript received April 19, 2005; revised August 26, 2015.}
+}
+
+\bibliography{ref}
+
+\begin{document}
+
+    % make the title area
+    \maketitle
+
+    \section{Introduction}
+    This document accompanies my homework 2 submission. It is designed to explain my thought process when developing my code. It will also explain the implementation of two different algorithms: Probabilistic RoadMaps (PRM) and Rapidly-Exploring Random Tree (RRT). PRM will be implemented with 4 different sampling methods, while RRT will also be implemented with another variant (RRT*).
+
+    \section{General Code Setup}
+    % Talk about how the code is set up
+
+    \section{Probabilistic RoadMaps (PRM)}
+
+    \subsection{The 4 Sampling Methods}
+
+    \subsubsection{Uniform Sampling}
+
+    \subsubsection{Random Sampling}
+
+    \subsubsection{Gaussian Sampling}
+
+    \subsubsection{Bridge Sampling}
+
+    \subsection{Search Method: }
+
+    \subsection{Results}
+     
+    \subsubsection{Uniform Sampling}
+
+    \subsubsection{Random Sampling}
+
+    \subsubsection{Gaussian Sampling}
+
+    \subsubsection{Bridge Sampling}
+
+    \section{Rapidly-Exploring Random Tree (RRT)}
+
+    \subsection{General RRT}
+
+    \subsubsection{Results}
+
+    \subsection{RRT*}
+
+    \subsubsection{Results}
+
+    \newpage
+
+    % References to cite:
+    % http://ottelab.com/html_stuff/pdf_files/Bialkowski_WAFR12.pdf
+    % https://www.researchgate.net/publication/301796015_Fast_probabilistic_collision_checking_for_sampling-based_motion_planning_using_locality-sensitive_hashing/link/5b0e5755aca2725783f228b4/download
+    % Fast Probabilistic Collision Checking forSampling-based Motion Planning usingLocality-Sensitive Hashing
+    % https://numpy.org/doc/stable/reference/random/generated/numpy.random.uniform.html
+    % https://www.sharpsightlabs.com/blog/np-random-uniform/
+    % https://en.wikipedia.org/wiki/Rapidly-exploring_random_tree
+
+
+    \printbibliography
+
+\end{document}
