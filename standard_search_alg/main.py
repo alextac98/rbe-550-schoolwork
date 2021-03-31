@@ -33,6 +33,7 @@ if __name__ == "__main__":
     # Load the map
     start = (200, 75)
     goal  = (30, 250)
+    # goal = (210, 85)
     map_array = load_map("WPI_map.jpg", 0.3)
 
     # Planning class
@@ -40,9 +41,9 @@ if __name__ == "__main__":
     RRT_planner = RRT(map_array, start, goal)
 
     # Search with PRM
-    # print("PRM with uniform sampling: ")
-    # PRM_planner.sample(n_pts=1000, sampling_method="uniform")
-    # PRM_planner.search(start, goal)
+    print("PRM with uniform sampling: ")
+    PRM_planner.sample(n_pts=1000, sampling_method="uniform")
+    PRM_planner.search(start, goal)
     print("\nPRM with random sampling")
     PRM_planner.sample(n_pts=1000, sampling_method="random")
     PRM_planner.search(start, goal)

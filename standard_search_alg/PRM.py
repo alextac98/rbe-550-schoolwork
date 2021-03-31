@@ -59,7 +59,9 @@ class PRM:
         return:
             True if occupied, False if not occupied
         """
-        return self.map_array[point[0], point[1]] == 0
+        if self.map_array[point[0], point[1]] == 0:
+            return True
+        return False
 
     def get_pts_in_range(self, pt):
         """ Get all whole points in a range (max distance)
@@ -97,9 +99,18 @@ class PRM:
         check collision and append valide points to self.samples
         as [(row1, col1), (row2, col2), (row3, col3) ...]
         '''
+        # There should be n total points, therefore must evenly divide rows and cols
+        map_ratio = self.size_col/self.size_row
+        n_row_pts = int(math.sqrt(n_pts) / map_ratio)
+        n_col_pts = int(math.sqrt(n_pts) * map_ratio)
 
+        row_pts = np.linspace(start=0, stop=self.size_col - 1, num=n_row_pts, dtype=int)
+        col_pts = np.linspace(start=0, stop=self.size_row - 1, num=n_col_pts, dtype=int)
         
-
+        for row in row_pts:
+            for col in col_pts:
+                if not self.is_point_occupied([row, col]):
+                    self.samples.append([row, col])
     
     def random_sample(self, n_pts):
         '''Use random sampling and store valid points
@@ -264,22 +275,40 @@ class PRM:
         # Clear previous path
         self.path = []
 
+
         # Temporarily add start and goal to the graph
         self.samples.append(start)
         self.samples.append(goal)
         # start and goal id will be 'start' and 'goal' instead of some integer
         self.graph.add_nodes_from(['start', 'goal'])
         # Add connections to start/goal
+        num_neighbors = 4
+        kdtree = spatial.KDTree(np.array(self.samples))
+        distances, neighbors = kdtree.query(x=self.samples[-2:], k=num_neighbors)
 
-        ### YOUR CODE HERE ###
+        start_pairs = []
+        goal_pairs = []
+        pairs_raw = []        
+
+        for neighbor_list, distance in zip(neighbors, distances):
+            node = neighbor_list[0]
+            for i in range(1, num_neighbors):
+                pairs_raw.append((node, neighbor_list[i], distance[i]))
+
+        for pair in pairs_raw:
+            if not self.check_collision(tuple(self.samples[pair[0]]), tuple(self.samples[pair[1]])):
+                if pair[0] == len(self.samples) - 2:
+                    start_pairs.append(('start', pair[1], pair[2]))
+                elif pair[0] == len(self.samples) - 1:
+                    goal_pairs.append(('goal', pair[1], pair[2]))
+                else:
+                    print("Warning: Not analyzing start or end node!!!")
 
         # Find the pairs of points that need to be connected
         # and compute their distance/weight.
         # You could store them as
         # start_pairs = [(start_id, p_id0, weight_s0), (start_id, p_id1, weight_s1), 
         #                (start_id, p_id2, weight_s2) ...]
-        start_pairs = []
-        goal_pairs = []
 
         # Add the edge to graph
         self.graph.add_weighted_edges_from(start_pairs)
@@ -300,6 +329,10 @@ class PRM:
         self.samples.pop(-1)
         self.samples.pop(-1)
         self.graph.remove_nodes_from(['start', 'goal'])
+        # self.graph.remove_edges_from(pairs)
         self.graph.remove_edges_from(start_pairs)
         self.graph.remove_edges_from(goal_pairs)
         
+    # def weighted_astar(self):
+    #     """ 
+    #     """
