@@ -21,7 +21,7 @@ class PRM:
         self.graph = nx.Graph()               # constructed graph
         self.path = []                        # list of nodes of the found path
 
-        np.random.seed(0)                     # Uncomment for debug
+        # np.random.seed(0)                     # Uncomment for debug
 
     def check_collision(self, p1, p2):
         '''Check if the path between two points collide with obstacles
@@ -40,7 +40,7 @@ class PRM:
             tmp_pts = [pts_list[0]]
             for i in range(len(pts_list) - 1):
                 # Find midpoint
-                midpoint = ((pts_list[i][0] + pts_list[i+1][0])/2, (pts_list[i][1] + pts_list[i+1][1])/2)
+                midpoint = self.midpoint(pts_list[i], pts_list[i+1])
                 # Check collisions
                 test_pts = self.get_pts_in_range(midpoint)
                 for pt in test_pts:
@@ -89,6 +89,16 @@ class PRM:
         '''
         return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
+    def midpoint(self, p1, p2):
+        ''' Calculate midpoint between two points
+        arguments:
+            p1 - point 1, [row, col]
+            p2 - point 2, [row, col]
+
+        return:
+            midpoint - [row column]
+        '''
+        return ((p1[0] + p2[0])/2, (p1[1] + p2[1])/2)
 
     def uniform_sample(self, n_pts):
         '''Use uniform sampling and store valid points
@@ -141,7 +151,7 @@ class PRM:
         check collision and append valide points to self.samples
         as [(row1, col1), (row2, col2), (row3, col3) ...]
         '''
-        std_dev = 10
+        std_dev = 20
         for i in range(0, n_pts):
             p1 = [np.random.randint(self.size_row), np.random.randint(self.size_col)]
             p2 = p1
@@ -164,9 +174,23 @@ class PRM:
         as [(row1, col1), (row2, col2), (row3, col3) ...]
         '''
 
-        ### YOUR CODE HERE ###
-        self.samples.append((0, 0))
+        std_dev = 20
 
+        for i in range(0, n_pts):
+            p1 = [np.random.randint(self.size_row), np.random.randint(self.size_col)]
+            while not self.is_point_occupied(p1):
+                p1 = [np.random.randint(self.size_row), np.random.randint(self.size_col)]
+            p2 = p1
+            while  p2 == p1 or p2[0] < 0 or p2[0] >= self.size_row \
+                            or p2[1] < 0 or p2[1] >= self.size_col:
+                p2 = [int(num) for num in np.random.normal(loc=p1, scale=std_dev)]
+            
+            if not self.is_point_occupied(p2):
+                continue
+            
+            midpoint = [int(pt) for pt in self.midpoint(p1, p2)]
+            if not self.is_point_occupied(midpoint):
+                self.samples.append(midpoint)
 
     def draw_map(self):
         '''Visualization of the result
@@ -233,7 +257,7 @@ class PRM:
         # pairs = [(p_id0, p_id1, weight_01), (p_id0, p_id2, weight_02), 
         #          (p_id1, p_id2, weight_12) ...]
         pairs = []
-        num_neighbors = 10
+        num_neighbors = 8
         kdtree = spatial.KDTree(np.array(self.samples))
         distances, neighbors = kdtree.query(x=self.samples, k=num_neighbors)
 
@@ -287,7 +311,7 @@ class PRM:
         # start and goal id will be 'start' and 'goal' instead of some integer
         self.graph.add_nodes_from(['start', 'goal'])
         # Add connections to start/goal
-        num_neighbors = 4
+        num_neighbors = 30
         kdtree = spatial.KDTree(np.array(self.samples))
         distances, neighbors = kdtree.query(x=self.samples[-2:], k=num_neighbors)
 
