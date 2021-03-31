@@ -21,7 +21,7 @@ class PRM:
         self.graph = nx.Graph()               # constructed graph
         self.path = []                        # list of nodes of the found path
 
-        np.random.seed(0)
+        np.random.seed(0)                     # Uncomment for debug
 
     def check_collision(self, p1, p2):
         '''Check if the path between two points collide with obstacles
@@ -131,9 +131,6 @@ class PRM:
             if not self.is_point_occupied([ran_row, ran_col]):
                 self.samples.append([ran_row, ran_col])
 
-        ### YOUR CODE HERE ###
-        self.samples.append((0, 0))
-
 
     def gaussian_sample(self, n_pts):
         '''Use gaussian sampling and store valid points
@@ -144,10 +141,18 @@ class PRM:
         check collision and append valide points to self.samples
         as [(row1, col1), (row2, col2), (row3, col3) ...]
         '''
-
-        ### YOUR CODE HERE ###
-        self.samples.append((0, 0))
-
+        std_dev = 10
+        for i in range(0, n_pts):
+            p1 = [np.random.randint(self.size_row), np.random.randint(self.size_col)]
+            p2 = p1
+            while  p2 == p1 or p2[0] < 0 or p2[0] >= self.size_row \
+                            or p2[1] < 0 or p2[1] >= self.size_col:
+                p2 = [int(num) for num in np.random.normal(loc=p1, scale=std_dev)]
+            
+            if self.is_point_occupied(p1) and not self.is_point_occupied(p2):
+                self.samples.append(p2)
+            elif not self.is_point_occupied(p1) and self.is_point_occupied(p2):
+                self.samples.append(p1)
 
     def bridge_sample(self, n_pts):
         '''Use bridge sampling and store valid points
