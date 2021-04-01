@@ -27,6 +27,7 @@ class RRT:
         # self.start.parent = Node(start[0], start[1])
         self.goal = Node(goal[0], goal[1])    # goal node
         self.vertices = []                    # list of nodes
+        self.vertices_new = []
         self.found = False                    # found flag
         
 
@@ -119,13 +120,17 @@ class RRT:
         '''Choose the goal or generate a random point
         arguments:
             goal_bias - the possibility of choosing the goal instead of a random point
-
+                        Number from 0% to 100%
+                            0 => Goal will be chosen 0% of the time
+                            100 => Goal will be chosen 100% of the time
         return:
             point - the new point
         '''
-        ### YOUR CODE HERE ###
-        return self.goal
+        
+        if np.random.randint(100) < goal_bias:
+            return self.goal
 
+        return Node(np.random.randint(self.size_row), np.random.randint(self.size_col))
     
     def get_nearest_node(self, point):
         '''Find the nearest node in self.vertices with respect to the new point
@@ -182,6 +187,9 @@ class RRT:
             plt.plot(node.col, node.row, markersize=3, marker='o', color='y')
             plt.plot([node.col, node.parent.col], [node.row, node.parent.row], color='y')
         
+        # for node in self.vertices_new:
+        #     plt.plot(node.col, node.row, markersize=2, marker='o', color='r')
+        
         # Draw Final Path if found
         if self.found:
             cur = self.goal
@@ -206,17 +214,21 @@ class RRT:
 
         In each step, extend a new node if possible, and check if reached the goal
         '''
+        
+        goal_bias = 2
+        neighbor_threshold = 40
+        new_point_distance = 20
         # Remove previous result
         self.init_map()
 
         for i in range(0, n_pts):
             # Pick a random position
-            point = Node(np.random.randint(self.size_row), np.random.randint(self.size_col))
+            point = self.get_new_point(goal_bias=goal_bias)
             # If occupied, go to next iteration
             if self.is_point_occupied(point):
                 continue
             # Connect to nearest neighbor
-            neighbors = self.get_neighbors(point, 50)
+            neighbors = self.get_neighbors(point, neighbor_threshold)
             for neighbor in neighbors:
                 if not self.check_collision(point, neighbor):
                     dist = self.distance(point, neighbor)
@@ -225,7 +237,25 @@ class RRT:
                         point.cost = dist
 
             if point.parent is not None:
-                self.vertices.append(point)
+                # Check if current point is goal
+                # self.vertices.append(point)
+                if point == self.goal:
+                    self.vertices.append(point)
+                    self.found = True
+                    break
+                
+                if self.distance(point, point.parent) < new_point_distance:
+                    self.vertices.append(point)
+                    continue
+
+                # Find point_new that is new_point_distance away from point
+                # 1. Get unit vector between selected neighbor and new_point
+                u_vec = [(point.row - point.parent.row) / point.cost, (point.col - point.parent.col) / point.cost] 
+                # 2. Calculate point_new using equation [point + new_point_distance * unit_vector]
+                point_new = Node(point.parent.row + u_vec[0] * new_point_distance, point.parent.col + u_vec[1] * new_point_distance)
+                point_new.parent = point.parent
+                # 3. Add new_point to the vertices list
+                self.vertices.append(point_new)
 
         # In each step,
         # get a new point, 
