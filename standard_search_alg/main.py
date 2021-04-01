@@ -56,6 +56,6 @@ if __name__ == "__main__":
 
     # # Search with RRT and RRT*
     print("\nRRT with 1000 Samples")
-    RRT_planner.RRT(n_pts=100)
+    RRT_planner.RRT(n_pts=1000)
     # print("\nRRT* with 2000 Samples")
     # RRT_planner.RRT_star(n_pts=2000)

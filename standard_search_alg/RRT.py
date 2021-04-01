@@ -23,7 +23,8 @@ class RRT:
         self.size_row = map_array.shape[0]    # map size
         self.size_col = map_array.shape[1]    # map size
 
-        self.start = Node(start[0], start[1]) # start node
+        self.start = Node(start[0], start[1]) # start node 
+        # self.start.parent = Node(start[0], start[1])
         self.goal = Node(goal[0], goal[1])    # goal node
         self.vertices = []                    # list of nodes
         self.found = False                    # found flag
@@ -57,7 +58,7 @@ class RRT:
         return:
             midpoint - [row column]
         '''
-        return Node((p1.row + p2.row)/2, (p1.row + p2.row)/2)
+        return Node((p1.row + p2.row)/2, (p1.col + p2.col)/2)
 
     
     def check_collision(self, node1: Node, node2: Node):
@@ -223,8 +224,8 @@ class RRT:
                         point.parent = neighbor
                         point.cost = dist
 
-            # if point.parent is not None:
-            self.vertices.append(point)
+            if point.parent is not None:
+                self.vertices.append(point)
 
         # In each step,
         # get a new point, 
