@@ -1,8 +1,9 @@
 # Standard Algorithm Implementation
 # Sampling-based Algorithms RRT and RRT*
-
+import math
 import matplotlib.pyplot as plt
 import numpy as np
+import networkx as nx
 
 
 # Class for each tree node
@@ -11,7 +12,7 @@ class Node:
         self.row = row        # coordinate
         self.col = col        # coordinate
         self.parent = None    # parent node
-        self.cost = 0.0       # cost
+        self.cost = 1000.0       # cost
 
 
 # Class for RRT
@@ -36,31 +37,82 @@ class RRT:
         self.vertices.append(self.start)
 
     
-    def dis(self, node1, node2):
-        '''Calculate the euclidean distance between two nodes
+    def distance(self, p1: Node, p2: Node):
+        '''Calculate the euclidean distance between two points
         arguments:
-            node1 - node 1
-            node2 - node 2
+            p1 - point 1, [row, col]
+            p2 - point 2, [row, col]
 
         return:
-            euclidean distance between two nodes
+            euclidean distance between two points
         '''
-        ### YOUR CODE HERE ###
-        return 0
+        return math.sqrt((p1.row - p2.row) ** 2 + (p1.col - p2.col) ** 2)
+
+    def midpoint(self, p1: Node, p2: Node):
+        ''' Calculate midpoint between two points
+        arguments:
+            p1 - point 1, [row, col]
+            p2 - point 2, [row, col]
+
+        return:
+            midpoint - [row column]
+        '''
+        return Node((p1.row + p2.row)/2, (p1.row + p2.row)/2)
 
     
-    def check_collision(self, node1, node2):
+    def check_collision(self, node1: Node, node2: Node):
         '''Check if the path between two nodes collide with obstacles
         arguments:
             node1 - node 1
             node2 - node 2
 
         return:
-            True if the new node is valid to be connected
+            False if the new node is valid to be connected
         '''
-        ### YOUR CODE HERE ###
-        return True
+        min_section_lengths = 1
+        pts_list = [node1, node2]
 
+        while (pts_list[1].row - pts_list[0].row) ** 2 + (pts_list[1].col - pts_list[0].col) ** 2 >= min_section_lengths ** 2:
+            tmp_pts = [pts_list[0]]
+            for i in range(len(pts_list) - 1):
+                # Find midpoint
+                midpoint = self.midpoint(pts_list[i], pts_list[i+1])
+                # Check collisions
+                test_pts = self.get_pts_in_range(midpoint)
+                for pt in test_pts:
+                    if self.is_point_occupied(pt):
+                        return True
+                # Add midpoint to the collision list if no collision
+                tmp_pts.append(midpoint)
+                tmp_pts.append(pts_list[i+1])
+            pts_list = tmp_pts
+        return False
+
+    def get_pts_in_range(self, pt:Node):
+        """ Get all whole points in a range (max distance)
+            Assumes range is 1 for now
+        arguments:
+            pt - point [row, col] (not ints)
+        return:
+            list of points (all ints)
+        """
+        pts_list = set()
+        pts_list.add(Node(math.floor(pt.row),    math.floor(pt.col)))
+        pts_list.add(Node(math.floor(pt.row),    math.ceil(pt.col)))
+        pts_list.add(Node(math.ceil(pt.row),     math.floor(pt.col)))
+        pts_list.add(Node(math.ceil(pt.row),     math.ceil(pt.col)))
+        return list(pts_list)
+
+    def is_point_occupied(self, point:Node):
+        """ Checks if the point is occupied in the map
+        arguments:
+            point - point [row, col]
+        return:
+            True if occupied, False if not occupied
+        """
+        if self.map_array[point.row, point.col] == 0:
+            return True
+        return False
 
     def get_new_point(self, goal_bias):
         '''Choose the goal or generate a random point
@@ -95,8 +147,13 @@ class RRT:
         return:
             neighbors - a list of neighbors that are within the neighbor distance 
         '''
-        ### YOUR CODE HERE ###
-        return [self.vertices[0]]
+        
+        potential_neighbors = []
+        # Get all nodes within neighbor range
+        for node in self.vertices:
+            if self.distance(new_node, node) < neighbor_size:
+                potential_neighbors.append(node)
+        return potential_neighbors
 
 
     def rewire(self, new_node, neighbors):
@@ -151,7 +208,23 @@ class RRT:
         # Remove previous result
         self.init_map()
 
-        ### YOUR CODE HERE ###
+        for i in range(0, n_pts):
+            # Pick a random position
+            point = Node(np.random.randint(self.size_row), np.random.randint(self.size_col))
+            # If occupied, go to next iteration
+            if self.is_point_occupied(point):
+                continue
+            # Connect to nearest neighbor
+            neighbors = self.get_neighbors(point, 50)
+            for neighbor in neighbors:
+                if not self.check_collision(point, neighbor):
+                    dist = self.distance(point, neighbor)
+                    if dist < point.cost:
+                        point.parent = neighbor
+                        point.cost = dist
+
+            # if point.parent is not None:
+            self.vertices.append(point)
 
         # In each step,
         # get a new point, 

@@ -3,10 +3,10 @@
 import math
 from typing import NoReturn
 import matplotlib.pyplot as plt
-from networkx.drawing.layout import kamada_kawai_layout
+# from networkx.drawing.layout import kamada_kawai_layout 
 import numpy as np
 import networkx as nx
-from numpy.ma import outerproduct
+# from numpy.ma import outerproduct
 from scipy import spatial
 
 # Class for PRM
