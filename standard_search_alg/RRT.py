@@ -133,7 +133,7 @@ class RRT:
 
         return Node(np.random.randint(self.size_row), np.random.randint(self.size_col))
     
-    def get_nearest_node(self, point):
+    def get_nearest_node(self, point, neighbor_threshold = 15):
         '''Find the nearest node in self.vertices with respect to the new point
         arguments:
             point - the new point
@@ -141,8 +141,17 @@ class RRT:
         return:
             the nearest node
         '''
-        ### YOUR CODE HERE ###
-        return self.vertices[0]
+        neighbors = self.get_neighbors(point, neighbor_threshold)
+        main_neighbor = None
+        main_neighbor_cost = 0
+
+        for neighbor in neighbors:
+            dist = self.distance(point, neighbor)
+            if main_neighbor is None or dist < main_neighbor_cost:
+                main_neighbor = neighbor
+                main_neighbor_cost = dist
+
+        return main_neighbor
 
 
     def get_neighbors(self, new_node, neighbor_size):
@@ -245,14 +254,7 @@ class RRT:
                 continue
 
             # Connect to nearest neighbor
-            neighbors = self.get_neighbors(point, neighbor_threshold)
-            main_neighbor = None
-            main_neighbor_cost = 0
-            for neighbor in neighbors:
-                dist = self.distance(point, neighbor)
-                if main_neighbor is None or dist < main_neighbor_cost:
-                    main_neighbor = neighbor
-                    main_neighbor_cost = dist
+            main_neighbor = self.get_nearest_node(point, neighbor_threshold = neighbor_threshold)
 
             # Extend the neighbor
             if main_neighbor is not None:
@@ -299,7 +301,6 @@ class RRT:
         # Remove previous result
         self.init_map()
 
-        ### YOUR CODE HERE ###
 
         # In each step,
         # get a new point, 

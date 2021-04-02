@@ -28,42 +28,67 @@
     \section{Introduction}
     This document accompanies my homework 2 submission. It is designed to explain my thought process when developing my code. It will also explain the implementation of two different algorithms: Probabilistic RoadMaps (PRM) and Rapidly-Exploring Random Tree (RRT). PRM will be implemented with 4 different sampling methods, while RRT will also be implemented with another variant (RRT*).
 
-    \section{General Code Setup}
-    % Talk about how the code is set up
+    \section{Questions}
+    \subsection{For PRM, what are the advantages and disadvantages of the four sampling methods in comparison to each other?}
 
-    \section{Probabilistic RoadMaps (PRM)}
+    Uniform sampling guarantees uniform distribution between points. However, without a lot of points, uniform sampling can fail to find an optimal solution when there are narrow passage-ways without many iterations.
 
-    \subsection{The 4 Sampling Methods}
+    Random sampling similarly attempts to give all locations equal opportunity to become a node, while also adding some randomness to attempt to curtain the issues with Uniform sampling. However, it too can fail to find a solution when narrow and curvy passageways exist between the start and end goal. It also can occasionally fail to sample all areas due to it's random selection process, especially if there are a low number of iterations.
 
-    \subsubsection{Uniform Sampling}
+    Gaussian Sampling attempts to "look" for obstacles, and will generally pick nodes close to the edges of obstacles. This is useful to try and identify obstacles, but it can sometimes lead to a failure to find a good solution, especially when there is little to no clutter in the environment
 
-    \subsubsection{Random Sampling}
+    Bridge Sampling is very effective at finding points when there are narrow passage ways. It is however slower than other sampling methods, and suffers from the same issues that Gaussian sampling does, where a lot of points are required and finding a good solution in low-clutter environments is not guaranteed.
 
-    \subsubsection{Gaussian Sampling}
+    \subsection{For RRT, what is the main difference between RRT and RRT*? What change does it make in terms of the efficiency of the algorithms and optimality of the search result?}
+    RRT* is a more optimized RRT. Simply put, RRT* can lead to a shorter path in less iterations. This is due to RRT*'s capability to 'rewire' itself, where existing nodes look around for shorter paths. Since RRT* is an anytime algorithm, it can also come up with many different paths, and pick between the best ones. While RRT usually can create really wavy paths, RRT* generally creates very straight and direct paths to the goal. It is also important to note that RRT* usually much slower per iteration, since it needs to rewire all past nodes.
 
-    \subsubsection{Bridge Sampling}
+    \subsection{Comparing between PRM and RRT, what are the advantages and disadvantages?}
+    
+    PRM is a great algorithm when multiple queries are needed. It is also probabilistically complete as an algorithm. However, guaranteeing a solution can be hard, especially with small passageways.
 
-    \subsection{Search Method: }
+    RRT and RRT* are very powerful for high degree-of-freedom collision avoidance. They are also good at exploring unexplored space due to its biases. RRT* also can guarantee optimality due to its anytime nature. However, they are both single-query search algorithms, which often make them very expensive for multi-search situations. RRT is also usually suboptimal.
 
-    \subsection{Results}
-     
-    \subsubsection{Uniform Sampling}
+    \section{Results \& Explanation}
+    \subsection{Uniform Sampling PRM}
+    \begin{figure}[H]
+        \includegraphics[width=\linewidth]{figures/UniformPRM.png}
+        \label{fig:UniformPRM}
+        \caption{Uniform Sampling PRM run with 1000 iterations. The graph had 815 nodes and 2971 edges. The length of the path was 260}
+    \end{figure} 
 
-    \subsubsection{Random Sampling}
+    
 
-    \subsubsection{Gaussian Sampling}
+    \subsection{Random Sampling PRM}
+    \begin{figure}[H]
+        \includegraphics[width=\linewidth]{figures/RandomPRM.png}
+        \label{fig:RandomPRM}
+        \caption{Random Sampling PRM run with 1000 iterations. The graph had 831 nodes and 3180 edges. The length of the path was 322}
+    \end{figure} 
 
-    \subsubsection{Bridge Sampling}
+    \subsection{Gaussian Sampling PRM}
+    \begin{figure}[H]
+        \includegraphics[width=\linewidth]{figures/GaussianPRM.png}
+        \label{fig:GaussianPRM}
+        \caption{Gaussian Sampling PRM run with 2000 iterations. The graph had 425 nodes and 1474 edges. The length of the path was 312}
+    \end{figure} 
 
-    \section{Rapidly-Exploring Random Tree (RRT)}
+    \subsection{Bridge Sampling PRM}
+    \begin{figure}[H]
+        \includegraphics[width=\linewidth]{figures/BridgePRM.png}
+        \label{fig:BridgePRM}
+        \caption{Bridge Sampling PRM run with 2000 iterations. The graph had 1974 nodes and 7647 edges. The length of the path was 330}
+    \end{figure} 
 
-    \subsection{General RRT}
-
-    \subsubsection{Results}
-
+    \subsection{RRT}
+    \begin{figure}[H]
+        \includegraphics[width=\linewidth]{figures/RRT.png}
+        \label{fig:RRT}
+        \caption{RRT run with 2000 iterations. It took 161 nodes to find a path length of 374}
+    \end{figure}
     \subsection{RRT*}
 
-    \subsubsection{Results}
+    \subsection{Additional Notes and resources}
+
 
     \newpage
 
@@ -76,6 +101,9 @@
     % https://en.wikipedia.org/wiki/Rapidly-exploring_random_tree
     % https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html
 
+    % RRT/RRT*
+    % https://theclassytim.medium.com/robotic-path-planning-rrt-and-rrt-212319121378
+    % https://en.wikipedia.org/wiki/Rapidly-exploring_random_tree
 
     \printbibliography
 
