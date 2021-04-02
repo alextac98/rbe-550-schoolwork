@@ -12,7 +12,7 @@ class Node:
         self.row = row        # coordinate
         self.col = col        # coordinate
         self.parent = None    # parent node
-        self.cost = 1000.0       # cost
+        self.cost = 0       # cost
 
 
 # Class for RRT
@@ -27,9 +27,10 @@ class RRT:
         # self.start.parent = Node(start[0], start[1])
         self.goal = Node(goal[0], goal[1])    # goal node
         self.vertices = []                    # list of nodes
-        self.vertices_new = []
+        self.vertices_points = []
         self.found = False                    # found flag
         
+        np.random.seed(0)
 
     def init_map(self):
         '''Intialize the map before each search
@@ -162,6 +163,17 @@ class RRT:
         return potential_neighbors
 
 
+    def is_node_in_map(self, node: Node):
+        ''' Checks if the node is in the map
+        arguments:
+            node: type Node
+        return:
+            bool: True if in map, False if not
+        '''
+        return  node.row >= 0 and node.row < self.size_row and \
+                node.col >= 0 and node.col < self.size_col
+
+
     def rewire(self, new_node, neighbors):
         '''Rewire the new node and all its neighbors
         arguments:
@@ -184,11 +196,9 @@ class RRT:
 
         # Draw Trees or Sample points
         for node in self.vertices[1:-1]:
+        # for node in self.vertices[1:]:
             plt.plot(node.col, node.row, markersize=3, marker='o', color='y')
             plt.plot([node.col, node.parent.col], [node.row, node.parent.row], color='y')
-        
-        # for node in self.vertices_new:
-        #     plt.plot(node.col, node.row, markersize=2, marker='o', color='r')
         
         # Draw Final Path if found
         if self.found:
@@ -215,53 +225,54 @@ class RRT:
         In each step, extend a new node if possible, and check if reached the goal
         '''
         
-        goal_bias = 2
-        neighbor_threshold = 40
-        new_point_distance = 20
+        goal_bias = 15
+        neighbor_threshold = 300
+        new_point_distance = 15
         # Remove previous result
         self.init_map()
 
         for i in range(0, n_pts):
             # Pick a random position
-            point = self.get_new_point(goal_bias=goal_bias)
-            # If occupied, go to next iteration
-            if self.is_point_occupied(point):
+            point = None
+            point = self.get_new_point(goal_bias=goal_bias) 
+
+            # Skip if point already exists
+            point_exists = False
+            for node in self.vertices:
+                if node.row == point.row and node.col == point.col:
+                    point_exists = True
+            if point_exists:
                 continue
+
             # Connect to nearest neighbor
             neighbors = self.get_neighbors(point, neighbor_threshold)
+            main_neighbor = None
+            main_neighbor_cost = 0
             for neighbor in neighbors:
-                if not self.check_collision(point, neighbor):
-                    dist = self.distance(point, neighbor)
-                    if dist < point.cost:
-                        point.parent = neighbor
-                        point.cost = dist
+                dist = self.distance(point, neighbor)
+                if main_neighbor is None or dist < main_neighbor_cost:
+                    main_neighbor = neighbor
+                    main_neighbor_cost = dist
 
-            if point.parent is not None:
-                # Check if current point is goal
-                # self.vertices.append(point)
-                if point == self.goal:
-                    self.vertices.append(point)
-                    self.found = True
-                    break
-                
-                if self.distance(point, point.parent) < new_point_distance:
-                    self.vertices.append(point)
-                    continue
-
-                # Find point_new that is new_point_distance away from point
+            # Extend the neighbor
+            if main_neighbor is not None:
                 # 1. Get unit vector between selected neighbor and new_point
-                u_vec = [(point.row - point.parent.row) / point.cost, (point.col - point.parent.col) / point.cost] 
+                u_vec = [(point.row - main_neighbor.row) / self.distance(point, main_neighbor), (point.col - main_neighbor.col) / self.distance(point, main_neighbor)] 
                 # 2. Calculate point_new using equation [point + new_point_distance * unit_vector]
-                point_new = Node(point.parent.row + u_vec[0] * new_point_distance, point.parent.col + u_vec[1] * new_point_distance)
-                point_new.parent = point.parent
-                # 3. Add new_point to the vertices list
-                self.vertices.append(point_new)
+                point_new = Node(round(main_neighbor.row + u_vec[0] * new_point_distance), 
+                                 round(main_neighbor.col + u_vec[1] * new_point_distance))
+                point_new.parent = main_neighbor
+                point_new.cost = point_new.parent.cost + self.distance(point_new.parent, point_new)
 
-        # In each step,
-        # get a new point, 
-        # get its nearest node, 
-        # extend the node and check collision to decide whether to add or drop,
-        # if added, check if reach the neighbor region of the goal.
+                # Check for collisions, and append
+                if not self.check_collision(point_new, point_new.parent) and self.is_node_in_map(point_new):
+                    self.vertices.append(point_new)
+                    if self.distance(point_new, self.goal) <= new_point_distance:
+                        self.goal.parent = point_new
+                        self.goal.cost = self.goal.parent.cost + self.distance(self.goal.parent, self.goal)
+                        self.vertices.append(self.goal)
+                        self.found = True
+                        break
 
         # Output
         if self.found:
