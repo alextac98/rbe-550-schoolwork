@@ -1,0 +1,119 @@
+\documentclass[journal]{IEEEtran}
+% If IEEEtran.cls has not been installed into the LaTeX system files,
+% manually specify the path to it like:
+% \documentclass[journal]{../sty/IEEEtran}
+
+% Import setup file with includes
+\input{setup.tex}
+
+\title{RBE 550 Standard Search Algorithms Implementation Documentation}
+
+% TODO: Fix authors
+\author{Alex Tacescu | Spring 2021
+% <-this % stops a space
+% \thanks{M. Shell was with the Department
+% of Electrical and Computer Engineering, Georgia Institute of Technology, Atlanta,
+% GA, 30332 USA e-mail: (see http://www.michaelshell.org/contact.html).}% <-this % stops a space
+% \thanks{J. Doe and J. Doe are with Anonymous University.}% <-this % stops a space
+% \thanks{Manuscript received April 19, 2005; revised August 26, 2015.}
+}
+
+\bibliography{ref}
+
+\begin{document}
+
+    % make the title area
+    \maketitle
+
+    \section{Introduction}
+    This document accompanies my homework 2 submission. It is designed to explain my thought process when developing my code. It will also explain the implementation of two different algorithms: Probabilistic RoadMaps (PRM) and Rapidly-Exploring Random Tree (RRT). PRM will be implemented with 4 different sampling methods, while RRT will also be implemented with another variant (RRT*).
+
+    \section{Questions}
+    \subsection{For PRM, what are the advantages and disadvantages of the four sampling methods in comparison to each other?}
+
+    Uniform sampling guarantees uniform distribution between points. However, without a lot of points, uniform sampling can fail to find an optimal solution when there are narrow passage-ways without many iterations.
+
+    Random sampling similarly attempts to give all locations equal opportunity to become a node, while also adding some randomness to attempt to curtain the issues with Uniform sampling. However, it too can fail to find a solution when narrow and curvy passageways exist between the start and end goal. It also can occasionally fail to sample all areas due to it's random selection process, especially if there are a low number of iterations.
+
+    Gaussian Sampling attempts to "look" for obstacles, and will generally pick nodes close to the edges of obstacles. This is useful to try and identify obstacles, but it can sometimes lead to a failure to find a good solution, especially when there is little to no clutter in the environment
+
+    Bridge Sampling is very effective at finding points when there are narrow passage ways. It is however slower than other sampling methods, and suffers from the same issues that Gaussian sampling does, where a lot of points are required and finding a good solution in low-clutter environments is not guaranteed.
+
+    \subsection{For RRT, what is the main difference between RRT and RRT*? What change does it make in terms of the efficiency of the algorithms and optimality of the search result?}
+    RRT* is a more optimized RRT. Simply put, RRT* can lead to a shorter path in less iterations. This is due to RRT*'s capability to 'rewire' itself, where existing nodes look around for shorter paths. Since RRT* is an anytime algorithm, it can also come up with many different paths, and pick between the best ones. While RRT usually can create really wavy paths, RRT* generally creates very straight and direct paths to the goal. It is also important to note that RRT* usually much slower per iteration, since it needs to rewire all past nodes.
+
+    \subsection{Comparing between PRM and RRT, what are the advantages and disadvantages?}
+    
+    PRM is a great algorithm when multiple queries are needed. It is also probabilistically complete as an algorithm. However, guaranteeing a solution can be hard, especially with small passageways.
+
+    RRT and RRT* are very powerful for high degree-of-freedom collision avoidance. They are also good at exploring unexplored space due to its biases. RRT* also can guarantee optimality due to its anytime nature. However, they are both single-query search algorithms, which often make them very expensive for multi-search situations. RRT is also usually suboptimal.
+
+    \section{Results \& Explanation}
+    \subsection{Uniform Sampling PRM}
+    \begin{figure}[H]
+        \includegraphics[width=\linewidth]{figures/UniformPRM.png}
+        \label{fig:UniformPRM}
+        \caption{Uniform Sampling PRM run with 1000 iterations. The graph had 815 nodes and 2971 edges. The length of the path was 260}
+    \end{figure} 
+
+
+
+    \subsection{Random Sampling PRM}
+    \begin{figure}[H]
+        \includegraphics[width=\linewidth]{figures/RandomPRM.png}
+        \label{fig:RandomPRM}
+        \caption{Random Sampling PRM run with 1000 iterations. The graph had 831 nodes and 3180 edges. The length of the path was 322}
+    \end{figure} 
+
+    \subsection{Gaussian Sampling PRM}
+    \begin{figure}[H]
+        \includegraphics[width=\linewidth]{figures/GaussianPRM.png}
+        \label{fig:GaussianPRM}
+        \caption{Gaussian Sampling PRM run with 2000 iterations. The graph had 425 nodes and 1474 edges. The length of the path was 312}
+    \end{figure} 
+
+    \subsection{Bridge Sampling PRM}
+    \begin{figure}[H]
+        \includegraphics[width=\linewidth]{figures/BridgePRM.png}
+        \label{fig:BridgePRM}
+        \caption{Bridge Sampling PRM run with 2000 iterations. The graph had 1974 nodes and 7647 edges. The length of the path was 330}
+    \end{figure} 
+
+    \subsection{RRT}
+    \begin{figure}[H]
+        \includegraphics[width=\linewidth]{figures/RRT.png}
+        \label{fig:RRT}
+        \caption{RRT run with 2000 iterations. It took 161 nodes to find a path length of 374}
+    \end{figure}
+    
+    \subsection{RRT*}
+    I did not get a chance to finish my implementation of RRT*. I was having some issues with my rewire function, although it should be the only thing remaining before RRT* implementation works.
+
+
+    \subsection{Additional Notes and resources}
+    I used a few resources. They are cited below:
+
+    Collision checking algorithms: \cite{FastProbabilisticCollisionChecking} \cite{EfficientCollisionChecking}
+
+    RRT and RRT* Resources: \cite{chin_2019} \cite{RRT_RRT-star_Comparison} \cite{Wikipedia_RRT}
+
+    Some additional resources I used: \cite{numpyrandomuniform} \cite{scipyspatialkdtree}
+
+    \newpage
+
+    % References to cite:
+    % http://ottelab.com/html_stuff/pdf_files/Bialkowski_WAFR12.pdf
+    % https://www.researchgate.net/publication/301796015_Fast_probabilistic_collision_checking_for_sampling-based_motion_planning_using_locality-sensitive_hashing/link/5b0e5755aca2725783f228b4/download
+    % Fast Probabilistic Collision Checking forSampling-based Motion Planning usingLocality-Sensitive Hashing
+    % https://numpy.org/doc/stable/reference/random/generated/numpy.random.uniform.html
+    % https://www.sharpsightlabs.com/blog/np-random-uniform/
+    % https://en.wikipedia.org/wiki/Rapidly-exploring_random_tree
+    % https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html
+
+    % RRT/RRT*
+    % https://theclassytim.medium.com/robotic-path-planning-rrt-and-rrt-212319121378
+    % https://en.wikipedia.org/wiki/Rapidly-exploring_random_tree
+
+    \printbibliography
+
+\end{document}
