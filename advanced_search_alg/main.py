@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # goal = (210, 85)
     map_array = load_map("WPI_map.jpg", 0.3)
 
-    astar = A_Star(map_array, g_weight = 1, h_weight = 1)
+    astar = A_Star(map_array, g_weight = 5, h_weight = 1)
 
     astar.find_path(start, goal)
 

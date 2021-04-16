@@ -17,6 +17,7 @@ class A_Star:
     
         self.g_weight = float(g_weight)
         self.h_weight = float(h_weight)
+        pass
 
     def set_map(self, map_array):
         self.map_array = map_array
@@ -63,23 +64,6 @@ class A_Star:
         img = 255 * np.dstack((self.map_array, self.map_array, self.map_array))
         ax.imshow(img)
 
-        # Draw graph
-        # get node position (swap coordinates)
-        # node_pos = np.array(self.samples)[:, [1, 0]]
-        # pos = dict( zip( range( len(self.samples) ), node_pos) )
-        # pos['start'] = (self.samples[-2][1], self.samples[-2][0])
-        # pos['goal'] = (self.samples[-1][1], self.samples[-1][0])
-        
-        # draw constructed graph
-        # nx.draw(self.graph, pos, node_size=3, node_color='y', edge_color='y' ,ax=ax)
-
-        # If found a path
-        # if self.path:
-        #     # add temporary start and goal edge to the path
-        #     final_path_edge = list(zip(self.path[:-1], self.path[1:]))
-        #     nx.draw_networkx_nodes(self.graph, pos=pos, nodelist=self.path, node_size=8, node_color='b')
-        #     nx.draw_networkx_edges(self.graph, pos=pos, edgelist=final_path_edge, width=2, edge_color='b')
-
         # Draw path if found
         x_pts = [x for x, y in self.path]
         y_pts = [y for x, y in self.path]
@@ -113,9 +97,9 @@ class A_Star:
                 break
 
             for next in self.get_neighbors(point=current):
-                if self.is_point_occupied(next):
+                if next is None or self.is_point_occupied(next):
                     continue
-                new_cost = self.cost_so_far[current] + self.get_euclidean_distance(current, next)
+                new_cost = self.g_weight * self.cost_so_far[current] + self.h_weight * self.get_euclidean_distance(current, next)
                 if next not in self.cost_so_far.keys() or new_cost < self.cost_so_far.get(next):
                     self.cost_so_far[next] = new_cost
                     priority = new_cost + self.get_euclidean_distance(goal, next)
