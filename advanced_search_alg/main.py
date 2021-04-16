@@ -2,8 +2,8 @@
 
 from PIL import Image
 import numpy as np
-# from RRT import RRT
-from PRM import PRM
+from RRT import RRT
+# from PRM import PRM
 from a_star import A_Star
 
 import matplotlib.pyplot as plt
@@ -37,30 +37,14 @@ if __name__ == "__main__":
     # goal = (210, 85)
     map_array = load_map("WPI_map.jpg", 0.3)
 
-    astar = A_Star(map_array, g_weight = 5, h_weight = 1)
-
+    astar = A_Star(map_array, g_weight = 1, h_weight = 5)
     astar.find_path(start, goal)
 
     # Planning class
-    # PRM_planner = PRM(map_array)
-    # RRT_planner = RRT(map_array, start, goal)
-
-    # Search with PRM
-    # print("PRM with uniform sampling: ")
-    # PRM_planner.sample(n_pts=1000, sampling_method="uniform")
-    # PRM_planner.search(start, goal)
-    # print("\nPRM with random sampling")
-    # PRM_planner.sample(n_pts=1000, sampling_method="random")
-    # PRM_planner.search(start, goal)
-    # print("\nPRM with Gaussian Sampling")
-    # PRM_planner.sample(n_pts=2000, sampling_method="gaussian")
-    # PRM_planner.search(start, goal)
-    # print("\nPRM with Bridge Sampling")
-    # PRM_planner.sample(n_pts=20000, sampling_method="bridge")
-    # PRM_planner.search(start, goal)
+    RRT_planner = RRT(map_array, start, goal)
 
     # # Search with RRT and RRT*
-    # print("\nRRT with 1000 Samples")
-    # RRT_planner.RRT(n_pts=1000)
+    print("\nRRT with 1000 Samples")
+    # RRT_planner.RRG(n_pts=1000)
     # print("\nRRT* with 2000 Samples")
     # RRT_planner.RRT_star(n_pts=2000)

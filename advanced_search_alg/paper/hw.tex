@@ -1,0 +1,68 @@
+\documentclass[journal]{IEEEtran}
+% If IEEEtran.cls has not been installed into the LaTeX system files,
+% manually specify the path to it like:
+% \documentclass[journal]{../sty/IEEEtran}
+
+% Import setup file with includes
+\input{setup.tex}
+
+\title{RBE 550 Advanced Search Algorithms Implementation Documentation}
+
+% TODO: Fix authors
+\author{Alex Tacescu | Spring 2021
+% <-this % stops a space
+% \thanks{M. Shell was with the Department
+% of Electrical and Computer Engineering, Georgia Institute of Technology, Atlanta,
+% GA, 30332 USA e-mail: (see http://www.michaelshell.org/contact.html).}% <-this % stops a space
+% \thanks{J. Doe and J. Doe are with Anonymous University.}% <-this % stops a space
+% \thanks{Manuscript received April 19, 2005; revised August 26, 2015.}
+}
+
+\bibliography{ref}
+
+\begin{document}
+
+    % make the title area
+    \maketitle
+
+    \section{Introduction}
+    This document accompanies my homework 3 submission. It is designed to explain my thought process when developing my code. It will also explain the implementation of two different algorithms: Weighted A* and Rapidly-Exploring Random Tree (RRG).
+
+    \section{Weighted A*}
+
+    Weighted A* is simply just A* with different weights for each of the two heuristics. A normal A* equation looks like: 
+
+    \begin{equation}
+        f(n) = g(n) + h(n)
+    \end{equation}
+
+    \(g(n)\) is the cost from the start to current node and \(h(n)\) is the estimated cost from the current node to the goal node. Weighted A* adds weights to each of these heuristics:
+    
+    \begin{equation}
+        f(n) = G * g(n) + H * h(n)
+    \end{equation}
+
+    \(G\) would be the weight for \(g(n)\) while \(H\) would be the weight for \(h(n)\). Weighted A* allows for better fine tuning to get faster or more precise results than traditional A*. If computation time isn't a concern, you can reduce the \(H\) weight and increase the \(G\) weight and the function will work closer to Dijkstra's algorithm. If you want a fast result and don't mind the final path to be the most optimal, then you can do the revers and increase \(H\) while reducing \(G\).
+    
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=\linewidth]{figures/WA_G1_H5.png}
+        \caption{A WA* run, with \(G = 5\) and \(H = 1\)}
+    \end{figure}
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=\linewidth]{figures/WA_G5_H1.png}
+        \caption{A WA* run, with \(G = 1\) and \(H = 5\)}
+    \end{figure}
+
+    \section{RRG}
+    RRG allows for more paths to be connected compared to a traditional RRT algorithm. The increase in connections between nodes allows for more possibilities and paths than RRT. This will give the final search algorithm more options to choose from, but it also adds more time for computation.
+
+    \begin{figure}[h!]
+        \centering
+        \includegraphics[width=\linewidth]{figures/RRG.png}
+        \caption{Results from RRG Algorithm run}
+    \end{figure}
+
+\end{document}

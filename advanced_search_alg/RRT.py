@@ -30,7 +30,7 @@ class RRT:
         self.vertices_points = []
         self.found = False                    # found flag
         
-        np.random.seed(0)
+        # np.random.seed(0)
 
     def init_map(self):
         '''Intialize the map before each search
@@ -183,20 +183,6 @@ class RRT:
         '''
         return  node.row >= 0 and node.row < self.size_row and \
                 node.col >= 0 and node.col < self.size_col
-
-
-    def rewire(self, new_node: Node, neighbors: List):
-        '''Rewire the new node and all its neighbors
-        arguments:
-            new_node - the new node
-            neighbors - a list of neighbors that are within the neighbor distance from the node
-
-        Rewire the new node if connecting to a new neighbor node will give least cost.
-        Rewire all the other neighbor nodes.
-        '''
-        for node in neighbors:
-            if self.distance(new_node, new_node.parent) + self.distance(new_node, node) < 
-
     
     def draw_map(self):
         '''Visualization of the result
@@ -228,7 +214,7 @@ class RRT:
         plt.show()
 
 
-    def RRT(self, n_pts=1000):
+    def RRG(self, n_pts=1000):
         '''RRT main search function
         arguments:
             n_pts - number of points try to sample, 
@@ -237,7 +223,7 @@ class RRT:
         In each step, extend a new node if possible, and check if reached the goal
         '''
         
-        goal_bias = 15
+        goal_bias = 5
         # neighbor_threshold = 300
         new_point_distance = 15
         # Remove previous result
@@ -272,6 +258,25 @@ class RRT:
                 # Check for collisions, and append
                 if self.is_node_in_map(point_new) and not self.check_collision(point_new, point_new.parent):
                     self.vertices.append(point_new)
+
+                    # Extend all vertices if they worked
+                    for neighbor in neighbors:
+                        if neighbor == main_neighbor:
+                            continue
+                        if not self.check_collision(point_new, neighbor):
+                            is_not_a_path = True
+                            for vertex in self.vertices:
+                                if vertex.row == point_new.row and vertex.col == point_new.col and \
+                                    vertex.parent.row == neighbor.row and vertex.parent.col == neighbor.col:
+                                    is_not_a_path = False
+                                    break
+                            if is_not_a_path:
+                                tmp_point = point_new
+                                tmp_point.parent = neighbor
+                                tmp_point.cost = tmp_point.parent.cost + self.distance(tmp_point.parent, tmp_point)
+                                self.vertices.append(tmp_point)
+
+
                     if self.distance(point_new, self.goal) <= new_point_distance:
                         self.goal.parent = point_new
                         self.goal.cost = self.goal.parent.cost + self.distance(self.goal.parent, self.goal)
@@ -288,78 +293,5 @@ class RRT:
         else:
             print("No path found")
         
-        # Draw result
-        self.draw_map()
-
-
-    def RRT_star(self, n_pts=1000, neighbor_size=20):
-        '''RRT* search function
-        arguments:
-            n_pts - number of points try to sample, 
-                    not the number of final sampled points
-            neighbor_size - the neighbor distance
-        
-        In each step, extend a new node if possible, and rewire the node and its neighbors
-        '''
-        # Remove previous result
-        self.init_map()
-
-        goal_bias = 15
-        new_point_distance = 15
-
-        for i in range(0, n_pts):
-            # Pick random point
-            point = self.get_new_point()
-
-            # Skip point if already exists
-            point_exists = False
-            for node in self.vertices:
-                if node.row == point.row and node.col == point.col:
-                    point_exists = True
-            if point_exists:
-                continue
-
-            # Find nearest neighbor
-            main_neighbor, neighbors = self.get_nearest_node(point, neighbor_threshold = neighbor_size)
-
-            # Extend the neighbor
-            if main_neighbor is not None:
-                # 1. Get unit vector between selected neighbor and new_point
-                u_vec = [(point.row - main_neighbor.row) / self.distance(point, main_neighbor), (point.col - main_neighbor.col) / self.distance(point, main_neighbor)] 
-                # 2. Calculate point_new using equation [point + new_point_distance * unit_vector]
-                point_new = Node(round(main_neighbor.row + u_vec[0] * new_point_distance), 
-                                 round(main_neighbor.col + u_vec[1] * new_point_distance))
-                point_new.parent = main_neighbor
-                point_new.cost = point_new.parent.cost + self.distance(point_new.parent, point_new)
-
-                # Check for collisions, and append
-                if self.is_node_in_map(point_new) and not self.check_collision(point_new, point_new.parent):
-                    self.vertices.append(point_new)
-                    if self.distance(point_new, self.goal) <= new_point_distance:
-                        self.goal.parent = point_new
-                        self.goal.cost = self.goal.parent.cost + self.distance(self.goal.parent, self.goal)
-                        self.vertices.append(self.goal)
-                        self.found = True
-
-                    # Rewire everything
-                    self.rewire(point_new, neighbors)
-            
-            
-        # In each step,
-        # get a new point, 
-        # get its nearest node, 
-        # extend the node and check collision to decide whether to add or drop,
-        # if added, rewire the node and its neighbors,
-        # and check if reach the neighbor region of the goal if the path is not found.
-
-        # Output
-        if self.found:
-            steps = len(self.vertices) - 2
-            length = self.goal.cost
-            print("It took %d nodes to find the current path" %steps)
-            print("The path length is %.2f" %length)
-        else:
-            print("No path found")
-
         # Draw result
         self.draw_map()
